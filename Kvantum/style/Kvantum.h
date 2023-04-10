@@ -170,6 +170,7 @@ class Style : public QCommonStyle {
        the default theme will be used. If the config or SVG file of
        the theme is missing, that of the default theme will be used. */
     void setTheme(const QString &baseThemeName, bool useDark);
+    void loadSvg(QSvgRenderer *rdr, const QString &data);
 
     /* Use the default config. */
     void setBuiltinDefaultTheme();

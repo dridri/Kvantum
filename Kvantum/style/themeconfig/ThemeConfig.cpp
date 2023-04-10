@@ -99,6 +99,44 @@ QVariant ThemeConfig::getValue(const QString& group, const QString& key) const
     settings_->endGroup();
   }
 
+  if (r.toString() == "system" && key.indexOf(".color") > 0)
+  {
+	QMap<QString, QPalette::ColorRole> colors = {
+		{ "window.text", QPalette::WindowText },
+		{ "button", QPalette::Button },
+		{ "light", QPalette::Light },
+		{ "mid.light", QPalette::Midlight },
+		{ "dark", QPalette::Dark },
+		{ "mid", QPalette::Mid },
+		{ "text", QPalette::Text },
+		{ "", QPalette::BrightText },
+		{ "button.text", QPalette::ButtonText },
+		{ "base", QPalette::Base },
+		{ "window", QPalette::Window },
+		{ "", QPalette::Shadow },
+		{ "highlight", QPalette::Highlight },
+		{ "highlight.text", QPalette::HighlightedText },
+		{ "link", QPalette::Link },
+		{ "link.visited", QPalette::LinkVisited },
+		{ "altbase", QPalette::AlternateBase },
+		{ "", QPalette::NoRole },
+		{ "", QPalette::ToolTipBase },
+		{ "tooltip.text", QPalette::ToolTipText },
+		{ "", QPalette::PlaceholderText }
+	};
+	bool inactive = false;
+	if (key.indexOf("inactive.") == 0) {
+		inactive = true;
+	}
+	QString k = (inactive ? key.mid(9) : key);
+	k = k.mid(0, k.length() - 6);
+	const QPalette::ColorGroup group = (inactive ? QPalette::Inactive : QPalette::Active);
+	if (colors.find(k) != colors.end()) {
+		r = QApplication::palette().color(group, colors[k]);
+	} else {
+		r = "inherits";
+	}
+  }
   return r;
 }
 
@@ -484,13 +522,13 @@ label_spec ThemeConfig::getLabelSpec(const QString &elementName)
   if (r.hasMargin)
   {
     v = getValue(name,KSL("text.margin.top"), i);
-    r.top = qMax(v.toInt(),0);
+    r.top = v.toInt();
     v = getValue(name,KSL("text.margin.bottom"), i);
-    r.bottom = qMax(v.toInt(),0);
+    r.bottom = v.toInt();
     v = getValue(name,KSL("text.margin.left"), i);
-    r.left = qMax(v.toInt(),0);
+    r.left = v.toInt();
     v = getValue(name,KSL("text.margin.right"), i);
-    r.right = qMax(v.toInt(),0);
+    r.right = v.toInt();
 
     /* let's make button-like widgets a little compact */
     if(name == "LineEdit")

@@ -17,6 +17,7 @@
 
 #include "Kvantum.h"
 
+#include <QDebug>
 #include <QDir>
 #include <QPainter>
 #include <QPainterPath>
@@ -460,6 +461,55 @@ static inline bool isThemeDir(const QString &path, const QString &themeName)
   return false;
 }
 
+void Style::loadSvg(QSvgRenderer *rdr, const QString &data)
+{
+  QMap<QString, QPalette::ColorRole> colors = {
+    { "window.text", QPalette::WindowText },
+    { "button", QPalette::Button },
+    { "light", QPalette::Light },
+    { "mid.light", QPalette::Midlight },
+    { "dark", QPalette::Dark },
+    { "mid", QPalette::Mid },
+    { "text", QPalette::Text },
+    { "", QPalette::BrightText },
+    { "button.text", QPalette::ButtonText },
+    { "base", QPalette::Base },
+    { "window", QPalette::Window },
+    { "", QPalette::Shadow },
+    { "highlight", QPalette::Highlight },
+    { "highlight.text", QPalette::HighlightedText },
+    { "link", QPalette::Link },
+    { "link.visited", QPalette::LinkVisited },
+    { "altbase", QPalette::AlternateBase },
+    { "", QPalette::NoRole },
+    { "", QPalette::ToolTipBase },
+    { "tooltip.text", QPalette::ToolTipText },
+    { "", QPalette::PlaceholderText }
+  };
+
+  qDebug() << "LOAD SVG :" << data;
+  QString d(data);
+
+  if (data.mid(0, 1) != "<")
+  {
+    QFile file(data);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream stream(&file);
+    d = stream.readAll();
+    file.close();
+  }
+
+  int i = d.indexOf("@color");
+  while (i > 0) {
+    int end = d.indexOf(QRegExp("[\\s;\"']"), i);
+    const QString color = d.mid(i + 7, end - i - 7);
+    qDebug() << "Color :" << color;
+    d.replace(i, end - i, QApplication::palette().color(QPalette::Active, colors[color]).name());
+    i = d.indexOf("@color", i);
+  }
+  rdr->load(d.toUtf8());
+}
+
 void Style::setTheme(const QString &baseThemeName, bool useDark)
 {
   if (themeSettings_)
@@ -593,7 +643,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
         if (!userSvg.isEmpty())
         {
           themeRndr_ = new QSvgRenderer();
-          themeRndr_->load(userSvg);
+		  loadSvg(themeRndr_, userSvg);
         }
         if (themeSettings_ || themeRndr_)
         {
@@ -659,7 +709,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
       if (!userSvg.isEmpty())
       { // user theme
         themeRndr_ = new QSvgRenderer();
-        themeRndr_->load(userSvg);
+		loadSvg(themeRndr_, userSvg);
       }
       else
       {
@@ -672,7 +722,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
             if (QFile::exists(temp))
             {
               themeRndr_ = new QSvgRenderer();
-              themeRndr_->load(temp);
+				loadSvg(themeRndr_, temp);
             }
             else if (!isThemeDir(QString(DATADIR) + "/Kvantum", themeName) // config shouldn't be found
                      && isThemeDir(QString(DATADIR) + "/Kvantum", lightName))
@@ -682,7 +732,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
               if (QFile::exists(temp))
               {
                 themeRndr_ = new QSvgRenderer();
-                themeRndr_->load(temp);
+				loadSvg(themeRndr_, temp);
               }
             }
 
@@ -697,7 +747,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
                 if (QFile::exists(temp))
                 {
                   themeRndr_ = new QSvgRenderer();
-                  themeRndr_->load(temp);
+				loadSvg(themeRndr_, temp);
                 }
               }
 
@@ -714,7 +764,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
                   if (QFile::exists(temp))
                   {
                     themeRndr_ = new QSvgRenderer();
-                    themeRndr_->load(temp);
+					loadSvg(themeRndr_, temp);
                   }
                 }
               }
@@ -731,7 +781,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
             if (QFile::exists(temp))
             {
               themeRndr_ = new QSvgRenderer();
-              themeRndr_->load(temp);
+			  loadSvg(themeRndr_, temp);
             }
             else if (isThemeDir(QString(DATADIR) + "/Kvantum", lightName))
             {
@@ -740,7 +790,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
               if (QFile::exists(temp))
               {
                 themeRndr_ = new QSvgRenderer();
-                themeRndr_->load(temp);
+			    loadSvg(themeRndr_, temp);
               }
             }
 
@@ -755,7 +805,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
                 if (QFile::exists(temp))
                 {
                   themeRndr_ = new QSvgRenderer();
-                  themeRndr_->load(temp);
+			      loadSvg(themeRndr_, temp);
                 }
               }
 
@@ -772,7 +822,7 @@ void Style::setTheme(const QString &baseThemeName, bool useDark)
                   if (QFile::exists(temp))
                   {
                     themeRndr_ = new QSvgRenderer();
-                    themeRndr_->load(temp);
+			        loadSvg(themeRndr_, temp);
                   }
                 }
               }
